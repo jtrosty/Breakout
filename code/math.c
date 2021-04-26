@@ -4,6 +4,13 @@ internal int clamp(int min, int val, int max) {
     return val;
 }
 
+// Color
+inline u32 make_color_from_grey(u8 grey) {
+    return (grey <<0) |
+            (grey << 8) |
+            (grey << 16);
+}
+
 // Vector 2
 
 struct {
@@ -16,3 +23,22 @@ struct {
         f32 e[2];
     };
 } typedef v2;
+
+inline v2 add_v2(v2 a, v2 b) {
+    return (v2) {a.x + b.x, a.y + b.y};
+}
+
+inline v2 mul_v2(v2 a, f32 s) {
+    return (v2) {a.x * s, a.y * s};
+}
+
+struct {
+    union {
+        struct {
+            int x;
+            int y;
+        };
+
+        int e[2];
+    };
+} typedef v2i;

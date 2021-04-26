@@ -13,8 +13,7 @@ enum {
 };
 
 struct {
-    int mouse_x;
-    int mouse_y;
+    v2i mouse; 
 
     Button buttons[BUTTON_COUNT];
 

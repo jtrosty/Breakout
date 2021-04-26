@@ -83,7 +83,7 @@ int WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int 
     LARGE_INTEGER frequency_counter_large;
     QueryPerformanceFrequency(&frequency_counter_large);
     f32 frequency_counter = (f32)frequency_counter_large.QuadPart;
-
+    // This is an initial value for the dt, .01667 s/frame ends up with 30 fps. 
     f32 last_dt = 0.01667f;
         
     while (running) {
@@ -124,6 +124,12 @@ if (vk_code == vk) { \
             }
         }
 
+        POINT mouse_pointer;
+        GetCursorPos(&mouse_pointer);
+        ScreenToClient(window, &mouse_pointer);
+        input.mouse.x = mouse_pointer.x;
+        input.mouse.y = render_buffer.height - mouse_pointer.y;
+
         // Simulation
         simulate_game(&input, last_dt);
 
@@ -136,6 +142,7 @@ if (vk_code == vk) { \
         // Get teh frame time
         LARGE_INTEGER current_counter;
         QueryPerformanceCounter(&current_counter);
+        // Calculates dt "delta time" the sec/frame. 
         last_dt = (f32) ((current_counter.QuadPart - last_counter.QuadPart) / frequency_counter);
         last_counter = current_counter;
 
