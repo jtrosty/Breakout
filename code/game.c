@@ -40,12 +40,10 @@ int next_block;
 v2 arena_half_size;
 
 b32 initialized = false;
-b32 is_colliding;
 
 #include "collision.c"
 
 internal void simulate_game(Input *input, f32 dt) {
-    is_colliding = false;
     if (!initialized) {
         initialized = true;
         ball_p.y = 40;
@@ -60,15 +58,15 @@ internal void simulate_game(Input *input, f32 dt) {
 
         block_half_size = (v2) {4, 2};
 
-#define num_x 10
-#define num_y 10 
+#define num_x 12
+#define num_y 12 
 
         f32 x_offset = block_half_size.x * num_x;
         f32 y_offset = block_half_size.y * num_y - 25;
         
 
-        for (int y = 0; y < 10; y++) {
-            for (int x = 0; x < 10; x++) {
+        for (int y = 0; y < num_y; y++) {
+            for (int x = 0; x < num_x; x++) {
                 Block *block = blocks + next_block++;
                 if (next_block >= array_count(blocks)) {
                     next_block = 0;
@@ -76,7 +74,7 @@ internal void simulate_game(Input *input, f32 dt) {
                 block->life = 1;
                 block->p.x = x * block_half_size.x * 2 - x_offset;
                 block->p.y = y * block_half_size.y * 2 - y_offset - 10; // @Hardcoded value
-                block->color = make_color_from_grey((x + y) * 2);
+                block->color = make_color_from_grey((x + y) * 5);
             }
         }
     }
@@ -99,7 +97,7 @@ internal void simulate_game(Input *input, f32 dt) {
         //is_colliding = true; // FOR TESTING @DELETE LATER
         // Player collision with ball
         ball_dp.y *= -1;
-        ball_dp.x += player_dp.x * .5f;
+        ball_dp.x += clamp(-100, player_dp.x, 100);
         ball_desired_p.y = player_p.y + player_half_size.y;
     } 
     else if (ball_desired_p.x + ball_half_size.x > arena_half_size.x) {
@@ -119,27 +117,51 @@ internal void simulate_game(Input *input, f32 dt) {
     for (Block *block = blocks; block != blocks + array_count(blocks); block ++) {
         if (!block->life) continue;
 
-        // This is the Ball/block collision
-        f32 diff = ball_desired_p.y - block->p.y;
-        if (diff > 0) {
-            f32 t_y = ((block->p.y - block_half_size.y - player_half_size.y) - player_p.y) / diff;
-            if (t_y >= 0.f && t_y <= 1.f) { 
-                f32 target_x = lerp(ball_p.x, t_y, ball_desired_p.x);
-                if(target_x + ball_half_size.x > block->p.x - block_half_size.x && 
-                   target_x - ball_half_size.x < block->p.x + block_half_size.x) {
-                        player_desired_p.y = lerp(player_p.y, t_y, player_desired_p.y);
-                   } 
-                
-
+        {
+            // This is the Ball/block collision, starts with the y. 
+            f32 diff = ball_desired_p.y - ball_p.y;
+            if (diff != 0) {
+                f32 collision_point;
+                if (ball_dp.y > 0) collision_point = block->p.y - block_half_size.y - ball_half_size.y;
+                else collision_point = block->p.y + block_half_size.y + ball_half_size.y;
+                f32 t_y = (collision_point - ball_p.y) / diff;
+                if (t_y >= 0.f && t_y <= 1.f) { 
+                    f32 target_x = lerp(ball_p.x, t_y, ball_desired_p.x);
+                    if(target_x + ball_half_size.x > block->p.x - block_half_size.x && 
+                       target_x - ball_half_size.x < block->p.x + block_half_size.x) {
+                            ball_desired_p.y = lerp(ball_p.y, t_y, ball_desired_p.y);
+                            ball_dp.y *= -1;
+                            block->life--;
+                    } 
+                }
             }
         }
-        player_p = player_desired_p;
 
+        {
+            // Calculate a New Diff for x-asiz collisions
+            f32 diff = ball_desired_p.x - ball_p.x;
+            if (diff != 0) {
+                f32 collision_point;
+                if (ball_dp.x > 0) collision_point = block->p.x - block_half_size.x - ball_half_size.x;
+                else collision_point = block->p.x + block_half_size.x + ball_half_size.x;
+                f32 t_x = (collision_point - ball_p.x) / diff;
+                if (t_x >= 0.f && t_x <= 1.f) { 
+                    f32 target_y = lerp(ball_p.y, t_x, ball_desired_p.y);
+                    if(target_y + ball_half_size.y > block->p.y - block_half_size.y && 
+                       target_y - ball_half_size.y < block->p.y + block_half_size.y) {
+                            ball_desired_p.x = lerp(ball_p.x, t_x, ball_desired_p.x);
+                            ball_dp.x *= -1;
+                            block->life--;
+                    } 
+                }
+            }
+        }
         //do_block_vs_ball_collision(block, block_half_size, ball_p, ball_desired_p);
         draw_rect(block->p, block_half_size, block->color);
     }
 
     ball_p = ball_desired_p;
+    player_dp.x = (player_desired_p.x - player_p.x) / dt;
     player_p = player_desired_p;
 
     draw_rect( ball_p, ball_half_size, 0x00ffff);

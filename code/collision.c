@@ -1,10 +1,10 @@
 // overlapping
 inline b32 is_colliding(v2 p1, v2 half_size1, v2 p2, v2 half_size2) {
     // aabb vs aabb collision
-    return  p1.y + half_size1.y > p2.y - half_size2.y && 
+    return  (p1.y + half_size1.y > p2.y - half_size2.y && 
             p1.y + half_size1.y < p2.y + half_size2.y && 
             p1.x + half_size1.x > p2.x - half_size2.x &&
-            p1.x - half_size1.x < p2.x + half_size2.x; 
+            p1.x - half_size1.x < p2.x + half_size2.x); 
 }
 
 inline b32 sweep_for_aabb(v2 start, v2 end, v2 object_p, v2 object_half_size) {

@@ -30,7 +30,7 @@ CALLBACK window_callback( HWND window, UINT message, WPARAM w_param, LPARAM l_pa
         } break;
         case WM_SIZE: {
             RECT rect;
-            GetWindowRect( window, &rect);
+            GetClientRect(window, &rect);
             render_buffer.width = rect.right - rect.left;
             render_buffer.height = rect.bottom - rect.top;
 
