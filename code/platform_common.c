@@ -20,6 +20,6 @@ struct {
 } typedef Input;
 
 // Spimplies the usage of the code in other places.
-#define pressed(b) (input->buttons[b].is_down && input->buttons[b].changed)
+#define pressed(b)  (input->buttons[b].is_down && input->buttons[b].changed)
 #define released(b) (!input->buttons[b].is_down && input->buttons[b].changed)
-#define is_down(b) (input->buttons[b].is_down)
+#define is_down(b)  (input->buttons[b].is_down)

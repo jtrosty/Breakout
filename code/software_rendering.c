@@ -102,8 +102,12 @@ internal void clear_screen_and_draw_rec(v2 p, v2 half_size, u32 color, u32 clear
     // This is the play space
     draw_rect_int_pixels(x0, y0, x1, y1, color);
     // Draw the boundary recs
+    // Left side
     draw_rect_int_pixels(0, 0, x0, render_buffer.height, clear_color);
+    // Right side 
     draw_rect_int_pixels(x1, 0, render_buffer.width, render_buffer.height, clear_color);
-    draw_rect_int_pixels(x0, 0, x1, y0, clear_color);
+    // Bottom
+    draw_rect_int_pixels(x0, 0, x1, y0, color);
+    // Top
     draw_rect_int_pixels(x0, y1, x1, render_buffer.height, clear_color);
 }
